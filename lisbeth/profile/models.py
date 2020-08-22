@@ -71,6 +71,7 @@ class Profile(models.Model):
         self.looking_for = d['Looking for']
         self.num_pics = int(d['num_pics'])
         self.last_login = datetime.strptime(d['last_login'], '%d/%m/%Y')
+        self.is_expired = d['is_expired']
 
     def process(self):
         if self.source == self.SOURCE_BM:
