@@ -1,4 +1,6 @@
 from datetime import datetime
+import re
+
 from django.db import models
 
 # Create your models here.
@@ -25,7 +27,7 @@ class Profile(models.Model):
     occupation = models.TextField(null=True, blank=True)
     work_place = models.TextField(null=True, blank=True)
     looking_for = models.TextField(null=True, blank=True)
-    num_pics = models.TextField()
+    num_pics = models.IntegerField()
     last_login = models.DateField()
     is_expired = models.BooleanField(default=False)
 
@@ -36,15 +38,18 @@ class Profile(models.Model):
         )
 
     def __str__(self):
-        if self.source == self.SOURCE_BM:
-            name = self.data['Name']
-        else:
-            raise ValueError('unknown source')
-        return '%s:%s - %s' % (self.get_source_display(), self.profile_id, name)
+        return '%s:%s - %s' % (self.get_source_display(), self.profile_id, self.name)
 
     def process_bm(self):
         d = self.data
-        self.name = d['Name']
+        name = d['Name']
+        name = re.sub('^Miss\.? ', '', name)
+        name = re.sub('^Mr\.? ', '', name)
+        name = re.sub('^Dr\.? ', '', name)
+        name = re.sub('^Doctor ', '', name)
+        name = re.sub('^Adv\.? ', '', name)
+        name = re.sub('^Advocate ', '', name)
+        self.name = name
         age, marital_status = d['Age / Marital Status'].split('/')
         self.age = int(age.split(' ')[0])
         self.marital_status = marital_status.strip()

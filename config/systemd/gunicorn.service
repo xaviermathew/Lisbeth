@@ -1,0 +1,11 @@
+[Unit]
+Description=gunicorn daemon
+
+[Service]
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/Lisbeth
+ExecStart=/home/ubuntu/Lisbeth/config/gunicorn/gunicorn.sh
+
+[Install]
+WantedBy=multi-user.target

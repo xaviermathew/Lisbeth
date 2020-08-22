@@ -26,10 +26,8 @@ update_systemd:
 	sudo systemctl daemon-reload
 restart:
 	sudo systemctl restart gunicorn
-	sudo systemctl restart celery
 stop:
 	sudo systemctl stop gunicorn
-	sudo systemctl stop celery
 static:
 	./manage.py collectstatic --noinput
 migrate:
@@ -46,6 +44,7 @@ venv:
 	sudo apt-get install -y python-dev build-essential git virtualenvwrapper
 	sudo apt-get install -y libpq-dev
 	sudo apt install libcurl4-openssl-dev libssl-dev
+	sudo apt-get install -y postgresql-client
 	echo "export WORKON_HOME=~/virtual_env" >> $(HOME)/.bash_aliases
 	echo "source /usr/share/virtualenvwrapper/virtualenvwrapper.sh" >> $(HOME)/.bash_aliases
 	echo "export VISUAL=vim" >> $(HOME)/.bash_aliases
