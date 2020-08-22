@@ -175,10 +175,6 @@ logging.getLogger('parso').setLevel(logging.WARNING)
 logging.getLogger('asyncio').setLevel(logging.WARNING)
 
 
-# scrapy
-SCRAPY_CACHE_DIR = 'data'
-
-
 # profile config
 SHOULD_LIMIT_PROFILE_CRAWL = False
 

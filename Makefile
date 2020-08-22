@@ -10,7 +10,6 @@ make_dirs:
 	mkdir -p $(PROJECT_DIR)/pids/celery/
 	mkdir -p $(PROJECT_DIR)/static/
 	mkdir -p $(PROJECT_DIR)/state
-	mkdir -p $(PROJECT_DIR)/data/cache/beth/
 	touch $(PROJECT_DIR)/state/logrotate-state
 swap:
 	sudo /bin/dd if=/dev/zero of=/var/swap bs=1M count=$(expr $(grep MemTotal /proc/meminfo | awk '{print $2}') / 1024)
