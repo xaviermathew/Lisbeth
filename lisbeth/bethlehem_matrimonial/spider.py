@@ -12,8 +12,6 @@ from lisbeth.profile.spiders.items import ProfileItemPipeline, ProfileItem
 
 
 class BaseBMSpider(scrapy.Spider):
-    is_expired_profile_spider = False
-
     @staticmethod
     def get_settings():
         d = get_project_settings()
@@ -24,6 +22,9 @@ class BaseBMSpider(scrapy.Spider):
         d['HTTPCACHE_DIR'] = 'data'
         d['ROBOTSTXT_OBEY'] = False
         return d
+
+    def get_extra_profile_data(self):
+        return {}
 
     def _parse_profile_container(self, response, container):
         beth_id = container.xpath('div[2]/div[2]').attrib['id'].split('-')[-1]
@@ -38,9 +39,9 @@ class BaseBMSpider(scrapy.Spider):
                 'last_login': last_login,
                 'bm_internal_id': bm_internal_id,
                 'num_pics': int(gallery.xpath('div/span[1]/text()').get().strip()),
-                'is_expired': self.is_expired_profile_spider
             },
         }
+        d['data'].update(self.get_extra_profile_data())
         for row in container.xpath('div[2]/div[1]/div'):
             row_parts = row.xpath('*/text()')
             if len(row_parts) == 3:
@@ -107,8 +108,32 @@ class BMSpider(BaseBMSpider):
 
 
 class AuthenticatedBMSpider(BaseBMSpider):
-    name = 'authd_bethlehem_matrimonial'
-    url_pattern = 'https://www.bethlehemmatrimonial.com/profiles?g=%27%20or%201==1;&sid=1598116223&p={page}'
+    url_pattern = 'https://www.bethlehemmatrimonial.com/profiles?g={gender}&sid=1598116223&p={page}&expired={expired}'
+    expired_choices = ['0', '1']
+    gender_choices = ['M', 'F']
+
+    @classmethod
+    def get_spider_classes(cls):
+        spider_classes = []
+        for gender in cls.gender_choices:
+            for expired in cls.expired_choices:
+                class_name = 'Authenticated{gender}{expired}BMSpider'.format(gender=gender, expired=expired)
+                spider_name = 'authd_{gender}_{expired}_bethlehem_matrimonial'
+                attrs = {
+                    'name': spider_name,
+                    'crawl_options': {
+                        'gender': gender,
+                        'expired': expired,
+                    },
+                    'profile_options': {
+                        'gender': gender,
+                        'is_expired': bool(expired),
+                    },
+                    'get_extra_profile_data': lambda self: self.profile_options
+                }
+                spider_class = type(str(class_name), (cls,), attrs)
+                spider_classes.append(spider_class)
+        return spider_classes
 
     def start_requests(self):
         formdata = {
@@ -127,15 +152,10 @@ class AuthenticatedBMSpider(BaseBMSpider):
         d['prev_page'] += 1
         page = d['prev_page']
         if not settings.SHOULD_LIMIT_PROFILE_CRAWL or page <= 3:
-            url = self.url_pattern.format(page=page)
+            url = self.url_pattern.format(page=page, **self.crawl_options)
             yield scrapy.Request(url, callback=self.parse_listing, meta=d)
 
     def parse_listing(self, response):
         for container in response.xpath('//*[@id="search-results"]/div/div[2]/div'):
             yield self._parse_profile_container(response, container)
         yield from self.get_listing(response)
-
-
-class ExpiredProfileBMSpider(AuthenticatedBMSpider):
-    url_pattern = AuthenticatedBMSpider.url_pattern + '&expired=1'
-    is_expired_profile_spider = True

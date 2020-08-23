@@ -12,7 +12,8 @@ class Command(BaseCommand):
                             required=True)
 
     def handle(self, *args, **options):
-        spider_class = get_object_from_python_path(options['spider'])
-        process = CrawlerProcess(spider_class.get_settings())
-        process.crawl(spider_class)
+        base_class = get_object_from_python_path(options['spider'])
+        process = CrawlerProcess(base_class.get_settings())
+        for spider_class in base_class.get_spider_classes():
+            process.crawl(spider_class)
         process.start()

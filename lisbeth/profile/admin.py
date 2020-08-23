@@ -6,5 +6,12 @@ from lisbeth.profile.models import Profile
 @admin.register(Profile)
 class PersonAdmin(admin.ModelAdmin):
     search_fields = ['profile_id', 'name']
-    list_display = ['profile_id', 'name', 'age', 'height', 'weight', 'complexion', 'education', 'occupation', 'work_place']
-    list_filter = ['marital_status', 'religion', 'diocese', 'complexion', 'work_place', 'last_login', 'is_expired', 'num_pics']
+    list_display = [
+        'profile_id', 'name', 'age', 'height', 'weight',
+        'complexion', 'education', 'occupation', 'work_place'
+    ]
+    list_filter = [
+        'marital_status', 'religion', 'gender', 'complexion',
+        'last_login', 'is_expired', 'num_pics', 'work_place',
+        'diocese'
+    ]

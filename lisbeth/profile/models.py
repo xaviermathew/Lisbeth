@@ -10,6 +10,12 @@ class Profile(models.Model):
         (SOURCE_BM, 'Bethlehem Matrimony')
     ]
 
+    GENDER_M = 'M'
+    GENDER_F = 'F'
+    GENDER_CHOICES = [
+        (GENDER_M, GENDER_M),
+        (GENDER_F, GENDER_F),
+    ]
     url = models.URLField()
     profile_id = models.CharField(max_length=25)
     source = models.CharField(max_length=1, choices=SOURCES)
@@ -27,6 +33,7 @@ class Profile(models.Model):
     occupation = models.TextField(null=True, blank=True)
     work_place = models.TextField(null=True, blank=True)
     looking_for = models.TextField(null=True, blank=True)
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES)
     num_pics = models.IntegerField()
     last_login = models.DateField()
     is_expired = models.BooleanField(default=False)
@@ -69,6 +76,7 @@ class Profile(models.Model):
         self.occupation = d['Occupation']
         self.work_place = d['Work Place']
         self.looking_for = d['Looking for']
+        self.gender = d['gender']
         self.num_pics = int(d['num_pics'])
         self.last_login = datetime.strptime(d['last_login'], '%d/%m/%Y')
         self.is_expired = d['is_expired']
