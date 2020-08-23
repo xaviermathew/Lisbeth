@@ -127,7 +127,7 @@ class AuthenticatedBMSpider(BaseBMSpider):
                     },
                     'profile_options': {
                         'gender': gender,
-                        'is_expired': bool(expired),
+                        'is_expired': bool(int(expired)),
                     },
                     'get_extra_profile_data': lambda self: self.profile_options
                 }

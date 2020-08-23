@@ -12,6 +12,6 @@ class PersonAdmin(admin.ModelAdmin):
     ]
     list_filter = [
         'marital_status', 'religion', 'gender', 'complexion',
-        'last_login', 'is_expired', 'num_pics', 'work_place',
-        'diocese'
+        'last_login', 'is_expired', 'num_pics', 'diocese',
+        'work_place',
     ]
