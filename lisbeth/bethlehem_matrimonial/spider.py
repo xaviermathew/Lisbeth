@@ -21,6 +21,7 @@ class BaseBMSpider(scrapy.Spider):
         d['HTTPCACHE_ENABLED'] = True
         d['HTTPCACHE_DIR'] = 'data'
         d['ROBOTSTXT_OBEY'] = False
+        d['TELNETCONSOLE_PORT'] = None
         return d
 
     def get_extra_profile_data(self):
@@ -108,7 +109,7 @@ class BMSpider(BaseBMSpider):
 
 
 class AuthenticatedBMSpider(BaseBMSpider):
-    url_pattern = 'https://www.bethlehemmatrimonial.com/profiles?g={gender}&sid={}&p={page}&expired={expired}'
+    url_pattern = 'https://www.bethlehemmatrimonial.com/profiles?g={gender}&sid={sid}&p={page}&expired={expired}'
     expired_choices = ['0', '1']
     gender_choices = ['M', 'F']
 
