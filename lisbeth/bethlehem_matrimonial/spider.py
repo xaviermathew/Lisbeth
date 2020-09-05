@@ -109,37 +109,51 @@ class BMSpider(BaseBMSpider):
 
 
 class AuthenticatedBMSpider(BaseBMSpider):
-    url_pattern = 'https://www.bethlehemmatrimonial.com/profiles?g={gender}&sid={sid}&p={page}&expired={expired}'
+    url_pattern = 'https://www.bethlehemmatrimonial.com/profiles?g={gender}&sid={sid}&p={page}&expired={expired}{extra}'
     expired_choices = ['0', '1']
     gender_choices = ['M', 'F']
+    extra_choices = ['', '&sl=1']
 
     @classmethod
     def get_spider_classes(cls):
         spider_classes = []
         today = datetime.today()
-        n_years_ago = today - timedelta(days=2 * 365)
-        every_week = 7 * 24 * 60 * 60
-        sids = range(int(n_years_ago.timestamp()), int(today.timestamp()), every_week)
-        for sid in sids:
-            for gender in cls.gender_choices:
-                for expired in cls.expired_choices:
-                    class_name = 'Authenticated{gender}{sid}{expired}BMSpider'.format(gender=gender, sid=sid, expired=expired)
-                    spider_name = 'authd_{gender}_{sid}_{expired}_bethlehem_matrimonial'
-                    attrs = {
-                        'name': spider_name,
-                        'crawl_options': {
-                            'gender': gender,
-                            'expired': expired,
-                            'sid': sid,
-                        },
-                        'profile_options': {
-                            'gender': gender,
-                            'is_expired': bool(int(expired)),
-                        },
-                        'get_extra_profile_data': lambda self: self.profile_options
-                    }
-                    spider_class = type(str(class_name), (cls,), attrs)
-                    spider_classes.append(spider_class)
+        n_years_ago = today - timedelta(days=3 * 365)
+        n_days = 7 * 24 * 60 * 60
+        sids = range(int(n_years_ago.timestamp()), int(today.timestamp()), n_days)
+        for extra in cls.extra_choices:
+            pythonified_extra = extra.replace('&', 'and').replace('=', 'equals')
+            for sid in sids:
+                for gender in cls.gender_choices:
+                    for expired in cls.expired_choices:
+                        class_name = 'Authenticated{gender}{sid}{expired}{extra}BMSpider'.format(
+                            gender=gender,
+                            sid=sid,
+                            expired=expired,
+                            extra=pythonified_extra
+                        )
+                        spider_name = 'authd_{gender}_{sid}_{expired}_{extra}_bethlehem_matrimonial'.format(
+                            gender=gender,
+                            sid=sid,
+                            expired=expired,
+                            extra=pythonified_extra
+                        )
+                        attrs = {
+                            'name': spider_name,
+                            'crawl_options': {
+                                'gender': gender,
+                                'expired': expired,
+                                'sid': sid,
+                                'extra': extra
+                            },
+                            'profile_options': {
+                                'gender': gender,
+                                'is_expired': bool(int(expired)),
+                            },
+                            'get_extra_profile_data': lambda self: self.profile_options
+                        }
+                        spider_class = type(str(class_name), (cls,), attrs)
+                        spider_classes.append(spider_class)
         return spider_classes
 
     def start_requests(self):
