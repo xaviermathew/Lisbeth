@@ -1,14 +1,9 @@
+from twisted.internet import reactor, defer
+from scrapy.crawler import CrawlerRunner
+
 from django.core.management.base import BaseCommand
 
-from scrapy.crawler import CrawlerProcess
 from lisbeth.core.utils.class_utils import get_object_from_python_path
-
-
-def start_sequentially(process: CrawlerProcess, crawlers: list):
-    print('start crawler {}'.format(crawlers[0].__name__))
-    deferred = process.crawl(crawlers[0])
-    if len(crawlers) > 1:
-        deferred.addCallback(lambda _: start_sequentially(process, crawlers[1:]))
 
 
 class Command(BaseCommand):
@@ -20,6 +15,13 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         base_class = get_object_from_python_path(options['spider'])
-        process = CrawlerProcess(base_class.get_settings())
-        start_sequentially(process, base_class.get_spider_classes())
-        process.start()
+        runner = CrawlerRunner(base_class.get_settings())
+
+        @defer.inlineCallbacks
+        def crawl():
+            for spider in base_class.get_spider_classes():
+                yield runner.crawl(spider)
+            reactor.stop()
+
+        crawl()
+        reactor.run()
