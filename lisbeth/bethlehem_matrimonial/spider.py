@@ -122,10 +122,14 @@ class AuthenticatedBMSpider(BaseBMSpider):
         n_days = 7 * 24 * 60 * 60
         sids = range(int(n_years_ago.timestamp()), int(today.timestamp()), n_days)
         for extra in cls.extra_choices:
+            if extra == '&sl=1':
+                sid_choices = sids
+            else:
+                sid_choices = ['']
             pythonified_extra = extra.replace('&', 'and').replace('=', 'equals')
-            for sid in sids:
-                for gender in cls.gender_choices:
-                    for expired in cls.expired_choices:
+            for gender in cls.gender_choices:
+                for expired in cls.expired_choices:
+                    for sid in sid_choices:
                         class_name = 'Authenticated{gender}{sid}{expired}{extra}BMSpider'.format(
                             gender=gender,
                             sid=sid,
