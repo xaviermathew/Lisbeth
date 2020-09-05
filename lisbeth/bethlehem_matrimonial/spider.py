@@ -1,5 +1,5 @@
 import copy
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import scrapy
 from scrapy.utils.project import get_project_settings
@@ -108,31 +108,37 @@ class BMSpider(BaseBMSpider):
 
 
 class AuthenticatedBMSpider(BaseBMSpider):
-    url_pattern = 'https://www.bethlehemmatrimonial.com/profiles?g={gender}&sid=1598116223&p={page}&expired={expired}'
+    url_pattern = 'https://www.bethlehemmatrimonial.com/profiles?g={gender}&sid={}&p={page}&expired={expired}'
     expired_choices = ['0', '1']
     gender_choices = ['M', 'F']
 
     @classmethod
     def get_spider_classes(cls):
         spider_classes = []
-        for gender in cls.gender_choices:
-            for expired in cls.expired_choices:
-                class_name = 'Authenticated{gender}{expired}BMSpider'.format(gender=gender, expired=expired)
-                spider_name = 'authd_{gender}_{expired}_bethlehem_matrimonial'
-                attrs = {
-                    'name': spider_name,
-                    'crawl_options': {
-                        'gender': gender,
-                        'expired': expired,
-                    },
-                    'profile_options': {
-                        'gender': gender,
-                        'is_expired': bool(int(expired)),
-                    },
-                    'get_extra_profile_data': lambda self: self.profile_options
-                }
-                spider_class = type(str(class_name), (cls,), attrs)
-                spider_classes.append(spider_class)
+        today = datetime.today()
+        n_years_ago = today - timedelta(days=2 * 365)
+        every_week = 7 * 24 * 60 * 60
+        sids = range(int(n_years_ago.timestamp()), int(today.timestamp()), every_week)
+        for sid in sids:
+            for gender in cls.gender_choices:
+                for expired in cls.expired_choices:
+                    class_name = 'Authenticated{gender}{sid}{expired}BMSpider'.format(gender=gender, sid=sid, expired=expired)
+                    spider_name = 'authd_{gender}_{sid}_{expired}_bethlehem_matrimonial'
+                    attrs = {
+                        'name': spider_name,
+                        'crawl_options': {
+                            'gender': gender,
+                            'expired': expired,
+                            'sid': sid,
+                        },
+                        'profile_options': {
+                            'gender': gender,
+                            'is_expired': bool(int(expired)),
+                        },
+                        'get_extra_profile_data': lambda self: self.profile_options
+                    }
+                    spider_class = type(str(class_name), (cls,), attrs)
+                    spider_classes.append(spider_class)
         return spider_classes
 
     def start_requests(self):
@@ -159,3 +165,13 @@ class AuthenticatedBMSpider(BaseBMSpider):
         for container in response.xpath('//*[@id="search-results"]/div/div[2]/div'):
             yield self._parse_profile_container(response, container)
         yield from self.get_listing(response)
+
+    # def parse_detail(self, response):
+    #     ed_and_prof = response.xpath('//*[@id="profile"]/div[2]/div[3]/div[2]/div')
+    #     ed_and_prof = response.xpath('//*[@id="profile"]/div[2]/div[4]/div[2]/div')
+    #     family_root = response.xpath('//*[@id="profile"]/div[2]/div[5]/div[2]/div')
+    #     parents_details = response.xpath('//*[@id="profile"]/div[2]/div[5]/div[3]/div[1]')
+    #     sibling_detail = response.xpath('//*[@id="profile"]/div[2]/div[6]/div[2]/div')
+    #     sibling_blob = response.xpath('//*[@id="profile"]/div[2]/div[6]/div[3]/div')
+    #     partner_preferences = response.xpath('//*[@id="profile"]/div[2]/div[7]/div[2]/div[1]')
+    #     expectations = response.xpath('//*[@id="profile"]/div[2]/div[8]/div[2]/div')

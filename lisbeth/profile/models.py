@@ -56,6 +56,8 @@ class Profile(models.Model):
         name = re.sub('^Doctor ', '', name)
         name = re.sub('^Adv\.? ', '', name)
         name = re.sub('^Advocate ', '', name)
+        name = re.sub('^Ar\.? ', '', name)
+        name = re.sub('^Architect ', '', name)
         self.name = name
         age, marital_status = d['Age / Marital Status'].split('/')
         self.age = int(age.split(' ')[0])
