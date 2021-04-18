@@ -17,9 +17,9 @@ class BaseBMSpider(scrapy.Spider):
         d = get_project_settings()
         d['LOG_LEVEL'] = 'INFO'
         d['ITEM_PIPELINES'] = {get_python_path(ProfileItemPipeline): 100}
-        d['DOWNLOADER_MIDDLEWARES'] = {'scrapy.downloadermiddlewares.httpcache.HttpCacheMiddleware': 100}
-        d['HTTPCACHE_ENABLED'] = True
-        d['HTTPCACHE_DIR'] = 'data'
+        # d['DOWNLOADER_MIDDLEWARES'] = {'scrapy.downloadermiddlewares.httpcache.HttpCacheMiddleware': 100}
+        # d['HTTPCACHE_ENABLED'] = True
+        # d['HTTPCACHE_DIR'] = 'data'
         d['ROBOTSTXT_OBEY'] = False
         d['TELNETCONSOLE_PORT'] = None
         return d
