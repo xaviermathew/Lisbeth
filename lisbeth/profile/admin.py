@@ -1,7 +1,12 @@
 from django.contrib import admin
 
 # Register your models here.
-from lisbeth.profile.models import Profile
+from lisbeth.profile.models import Profile, Photo
+
+
+class PhotoInline(admin.StackedInline):
+    model = Photo
+
 
 @admin.register(Profile)
 class PersonAdmin(admin.ModelAdmin):
@@ -13,5 +18,6 @@ class PersonAdmin(admin.ModelAdmin):
     list_filter = [
         'marital_status', 'religion', 'gender', 'complexion',
         'last_login', 'is_expired', 'num_pics', 'diocese',
-        'work_place',
+        'work_place', 'family_status'
     ]
+    inlines = [PhotoInline]
