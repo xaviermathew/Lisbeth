@@ -148,3 +148,6 @@ class Photo(BaseModel):
     profile = models.ForeignKey(Profile, on_delete=models.deletion.CASCADE)
     url = models.URLField()
     thumb_url = models.URLField()
+
+    def __str__(self):
+        return self.profile.profile_id

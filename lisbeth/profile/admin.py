@@ -1,11 +1,20 @@
 from django.contrib import admin
+from django.utils.html import mark_safe
 
-# Register your models here.
 from lisbeth.profile.models import Profile, Photo
 
 
 class PhotoInline(admin.StackedInline):
     model = Photo
+    extra = 0
+    exclude = ['url', 'thumb_url']
+    readonly_fields = ['img_tag']
+
+    def img_tag(self, photo):
+        if photo.url:
+            return mark_safe('<img src="%s" style="max-width: 350px; max-height: 350px;"/>' % photo.url)
+        else:
+            return ''
 
 
 @admin.register(Profile)

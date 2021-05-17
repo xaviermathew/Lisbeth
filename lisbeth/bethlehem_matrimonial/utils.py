@@ -9,7 +9,8 @@ def _get_data_for_profile_id(base_dir, profile_id):
     d = {
         'photos': [],
         'thumbnails': [],
-        'profile_id': 'https://www.bethlehemmatrimonial.com/profile/' + profile_id
+        'profile_id': profile_id,
+        'url': 'https://www.bethlehemmatrimonial.com/profile/' + profile_id
     }
 
     try:
@@ -115,10 +116,7 @@ def get_data_for_profile_id(base_dir, profile_id):
     from lisbeth.profile.models import Profile
 
     raw_d = _get_data_for_profile_id(base_dir, profile_id) or {}
-    d = {
-        'about_candidate': raw_d.get('about_candidate'),
-        'expectations_about_partner': raw_d.get('expectations_about_partner')
-    }
+    d = {k: v for k, v in raw_d.items() if not isinstance(v, dict)}
     primary_d = raw_d.get('primary_details', {})
     if primary_d:
         d['name'] = Profile._clean_name(primary_d['name'])
